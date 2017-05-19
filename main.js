@@ -1,21 +1,37 @@
 var captchaSolver = require('./captcha_solver.js'),
+    moment = require('moment'),
     utils = require('./utils.js'),
     config = require('./config.json'),
+    fs = require('fs'),
     casper = require('casper').create({
         pageSettings : {
             userAgent : 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
         },
-        verbose: true
+        verbose: true,
+        logLevel: 'info'
     });
+var link_pdf;
+
+casper.on('remote.message', function(message) {
+    this.log(message, 'info');
+});
+//TODO: hacer andar el log
+// casper.on('log', function (entry) {
+//     var file = fs.open('log.txt', 'w');
+//     var fecha = moment.format('YYYY-MM-DD hh:mm:ss a');
+//     fs.writeFile(file, '['+fecha +']' + entry.message, function (error) {
+//         console.log(error);
+//     });
+//     file.close();
+// });
 
 //Poner la url en el config.json
-
 var formDataFields = {
     rut           : { name : 'W0023vRUTPRINCIPAL',         value :  '217667300012'},
                                                                     //Key del input con el captcha
-    captchaKey    : { name : 'recaptcha_challenge_field' , value : 'bd4dae81-28d7-44a2-8994-9e6be8a6b295'},
+    captchaKey    : { name : 'recaptcha_challenge_field' , value : 'adee60f5-b2eb-4019-b9bb-0015859fd527'},
                                                                     //solucion al captcha
-    captchaSolved : { name : 'recaptcha_response_field',   value : 'armetly'},
+    captchaSolved : { name : 'recaptcha_response_field',   value : 'fatled'},
     toRequest: function () {
         var result = {};
         result[this.rut.name] = this.rut.value;
@@ -25,13 +41,9 @@ var formDataFields = {
     }
 
 };
-//document.querySelector('iframe').contentWindow.document.querySelector('iframe').contentWindow.document.querySelector('embed');
-casper.on('remote.message', function(message) {
-    this.echo(message);
-});
 
 casper.start(config.url, function () {
-    this.echo('Loading site, wait');
+    this.log('Loading site, wait', 'info');
     //Esperamos que se cargue el frame del captcha
     this.waitForSelector('iframe');
 });
@@ -61,7 +73,6 @@ casper.then(function () {
 });
 
 casper.then(function () {
-    var link_pdf;
     this.wait(2000);
     this.withFrame('gxpea000889000001', function () {
         //Saca foto!
@@ -71,17 +82,16 @@ casper.then(function () {
                 por alguna razon no renderea el <embed> que tiene el pdf dentro
               */
             var iframe = document.querySelector('iframe');
-            console.log(iframe.name);
-            var frameDocument = iframe.contentWindow.document;
-            //trae vacio! :<
-            var container_pdf = frameDocument.querySelector('embed');
-            console.log(container_pdf);
-            return container_pdf.src;
+            return iframe.src;
         });
         this.capture('manco1.jpg');
     });
+});
 
-
+casper.then(function () {
+    if(link_pdf != null) {
+        this.download(link_pdf, formDataFields.rut.value + '.pdf');
+    }
 });
 
 casper.run();

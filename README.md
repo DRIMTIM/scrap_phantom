@@ -10,6 +10,10 @@ Instalar casper js
 
 http://docs.casperjs.org/en/latest/installation.html
 
+En la carpeta del proyecto correr
+
+`npm install --save`
+
 Luego correr en la consola:
 
 `casperjs main.js`
