@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/DRIMTIM/scrap_phantom#readme",
   "dependencies": {
+    "anti-captcha": "0.0.3",
     "moment": "^2.18.1"
   }
 }
